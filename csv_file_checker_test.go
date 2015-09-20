@@ -2,6 +2,7 @@ package csvfilechecker
 
 import (
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -10,108 +11,51 @@ const (
 	testFileSuffix = ".csv"
 )
 
-/* Old trial for all files
-func TestAllCSVParse(t *testing.T) {
-	fileInfos, err := ioutil.ReadDir(testDataDir)
-	if err != nil {
-		t.Fatalf("ioutil.ReadDir(%q) err = %v, expected nil", testDataDir, err)
-	}
-	for _, fileInfo := range fileInfos {
-		fileName := fileInfo.Name()
-		if !strings.HasSuffix(fileName, testFileSuffix) {
-			continue
+type testpair struct {
+	fileName           string
+	delimiter          rune
+	expectedSplitCount []int
+	// expectedResult string
+}
+
+var tests = []testpair{
+	{"csv_comma" + testFileSuffix, ',', []int{3}},
+	{"csv_comma_enclosed" + testFileSuffix, ',', []int{3}},
+	{"csv_comma_enclosed_header" + testFileSuffix, ',', []int{3}},
+	{"csv_pipe" + testFileSuffix, '|', []int{3}},
+	// {"csv_comma_few" + testFileSuffix, ',', []int{3,2}},
+	// {"csv_comma_more" + testFileSuffix, ',', []int{3,4}},
+}
+
+func TestRead(t *testing.T) {
+	for _, pair := range tests {
+		result, err := Read(testDataDir+string(os.PathSeparator)+pair.fileName, pair.delimiter)
+		if err != nil {
+			t.Fatalf("Read(%q) err = %v, expected nil", pair.fileName, err)
 		}
-		if _, err := Read(testDataDir+string(os.PathSeparator)+fileName, ','); err != nil {
-			t.Fatalf("Read(%q) err = %v, expected nil", fileName, err)
+
+		// t.Logf("result: %+v", result)
+
+		//test fileName match
+		if result.Filename != pair.fileName {
+			t.Fatalf("Read(%q) fileName = %v, expected %v", pair.fileName, result.Filename, pair.fileName)
 		}
-	}
-}
-*/
 
-func TestCommaCSVParse(t *testing.T) {
-	fileName := "csv_comma.csv"
-	delimiter := ','
-	expectedResult := "splits\n3 -> 5 lines"
+		//test no splits
+		if len(result.Splits) == 0 {
+			t.Fatalf("This file(%q) has no splits", pair.fileName)
+		}
 
-	result, err := Read(testDataDir+string(os.PathSeparator)+fileName, delimiter)
-	if err != nil {
-		t.Fatalf("Read(%q) err = %v, expected nil", fileName, err)
-	}
-	if result != expectedResult {
-		t.Fatalf("Read(%q) statistics = %v, expected %v", fileName, result, expectedResult)
-	}
-}
+		//test expectedSplitCount match
+		//collect result.Splits Counts
+		var resultSplitCount []int
+		for _, s := range result.Splits {
+			resultSplitCount = append(resultSplitCount, s.Count)
+		}
 
-func TestCommaEnclosedCSVParse(t *testing.T) {
-	fileName := "csv_comma_enclosed.csv"
-	delimiter := ','
-	expectedResult := "splits\n3 -> 5 lines"
-
-	result, err := Read(testDataDir+string(os.PathSeparator)+fileName, delimiter)
-	if err != nil {
-		t.Fatalf("Read(%q) err = %v, expected nil", fileName, err)
-	}
-	if result != expectedResult {
-		t.Fatalf("Read(%q) statistics = %v, expected %v", fileName, result, expectedResult)
-	}
-}
-
-func TestCommaEnclosedHeaderCSVParse(t *testing.T) {
-	fileName := "csv_comma_enclosed_header.csv"
-	delimiter := ','
-	expectedResult := "splits\n3 -> 6 lines"
-
-	result, err := Read(testDataDir+string(os.PathSeparator)+fileName, delimiter)
-	if err != nil {
-		t.Fatalf("Read(%q) err = %v, expected nil", fileName, err)
-	}
-	if result != expectedResult {
-		t.Fatalf("Read(%q) statistics = %v, expected %v", fileName, result, expectedResult)
-	}
-}
-
-/*TODO
-func TestCommaFewCSVParse(t *testing.T) {
-	fileName := "csv_comma_few.csv"
-	delimiter := ','
-	expectedResult := "splits\n3 -> 4 lines\n2 -> 1 lines"
-
-	result, err := Read(testDataDir+string(os.PathSeparator)+fileName, delimiter)
-	if err != nil {
-		t.Fatalf("Read(%q) err = %v, expected nil", fileName, err)
-	}
-	if result != expectedResult {
-		t.Fatalf("Read(%q) statistics = %v, expected %v", fileName, result, expectedResult)
-	}
-}
-*/
-
-/*TODO
-func TestCommaMoreCSVParse(t *testing.T) {
-	fileName := "csv_comma_more.csv"
-	delimiter := ','
-	expectedResult := "splits\n3 -> 4 lines\n4 -> 1 lines"
-
-	result, err := Read(testDataDir+string(os.PathSeparator)+fileName, delimiter)
-	if err != nil {
-		t.Fatalf("Read(%q) err = %v, expected nil", fileName, err)
-	}
-	if result != expectedResult {
-		t.Fatalf("Read(%q) statistics = %v, expected %v", fileName, result, expectedResult)
-	}
-}
-*/
-
-func TestPipeCSVParse(t *testing.T) {
-	fileName := "csv_pipe.csv"
-	delimiter := '|'
-	expectedResult := "splits\n3 -> 5 lines"
-
-	result, err := Read(testDataDir+string(os.PathSeparator)+fileName, delimiter)
-	if err != nil {
-		t.Fatalf("Read(%q) err = %v, expected nil", fileName, err)
-	}
-	if result != expectedResult {
-		t.Fatalf("Read(%q) statistics = %v, expected %v", fileName, result, expectedResult)
+		//check if they are equal to what is expected
+		if reflect.DeepEqual(resultSplitCount, pair.expectedSplitCount) == false {
+			t.Fatalf("Read(%q) SplitCount = %v, expected %v", pair.fileName, resultSplitCount, pair.expectedSplitCount)
+		}
 	}
 }
