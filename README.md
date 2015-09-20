@@ -1,5 +1,7 @@
 # CSV file checker written in Golang
 
+Written to help troubleshoot faulty CSV files quickly
+
 Works with custom delimiters
 
 Tells you statistics about the CSV file(s) you input:
