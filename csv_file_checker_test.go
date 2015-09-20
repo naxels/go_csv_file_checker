@@ -23,8 +23,9 @@ var tests = []testpair{
 	{"csv_comma_enclosed" + testFileSuffix, ',', []int{3}},
 	{"csv_comma_enclosed_header" + testFileSuffix, ',', []int{3}},
 	{"csv_pipe" + testFileSuffix, '|', []int{3}},
-	// {"csv_comma_few" + testFileSuffix, ',', []int{3,2}},
-	// {"csv_comma_more" + testFileSuffix, ',', []int{3,4}},
+	{"csv_comma_few" + testFileSuffix, ',', []int{3, 2}},
+	{"csv_comma_more" + testFileSuffix, ',', []int{3, 4}},
+	{"csv_comma_more_few" + testFileSuffix, ';', []int{3, 2, 4}},
 }
 
 func TestRead(t *testing.T) {
@@ -34,7 +35,7 @@ func TestRead(t *testing.T) {
 			t.Fatalf("Read(%q) err = %v, expected nil", pair.fileName, err)
 		}
 
-		// t.Logf("result: %+v", result)
+		t.Logf("result: %+v", result)
 
 		//test fileName match
 		if result.Filename != pair.fileName {

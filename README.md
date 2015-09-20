@@ -1,13 +1,13 @@
-CSV file checker written in Golang
+# CSV file checker written in Golang
 
-can work with custom delimiters and enclosures
+Works with custom delimiters
 
-tells you statistics about the file(s) you input:
-* amount of splits
-* lines containing that split
-* TODO: the lines within that split
+Tells you statistics about the CSV file(s) you input:
+* Split count(s) in the file
+* Amount of records containing that split count (by doing a simple `len()`)
+* the actual records splitted within that split (valuable for using them or troubleshooting)
 
-you can use a go routine to input a volume of files
+You can use a go routine to input a volume of files and get statistics back
 
 ## Installation
 ```
@@ -17,9 +17,10 @@ go get github.com/naxels/go_csv_file_checker
 ## Basic Usage
 ```
 import "github.com/naxels/go_csv_file_checker"
+// be sure to import fmt package for this example
 
 //single file:
-file := "filelocation/filename.extension"
+fileLocation := "filelocation/filename.extension"
 delimiter := ',' //any rune character
 
 statistics, err := csvfilechecker.Read(fileLocation, delimiter)
@@ -30,13 +31,11 @@ if err != nil {
 fmt.Println(statistics.Filename)
 
 for _, s := range statistics.Splits {
-  fmt.Printf("Split count: %v\n", s.Count)
+  fmt.Printf("Split count: %v, containing %v records\n", s.Count, len(s.Records))
 
-  for i, l := range s.Lines {
+  for i, l := range s.Records {
     fmt.Printf("%v, %v\n", i, l.Data)
+    //add the index number after l.Data[] to get specific column
   }
 }
 ```
-
-#### Roadmap
-* make the few and more CSV files work
