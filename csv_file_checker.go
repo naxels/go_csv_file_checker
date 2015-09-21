@@ -81,6 +81,7 @@ func Read(fileLocation string, delimiter rune) (*Statistics, error) {
 	r := csv.NewReader(file)
 	r.Comma = delimiter
 	r.FieldsPerRecord = -1 // one of the key statistics is discovering broken CSV files
+	r.LazyQuotes = true    // the unpredicability of incoming data should allow "'s to appear
 
 	for {
 		recordRaw, err := r.Read()

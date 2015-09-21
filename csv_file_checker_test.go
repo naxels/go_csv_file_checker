@@ -26,6 +26,7 @@ var tests = []testpair{
 	{"csv_comma_few" + testFileSuffix, ',', []int{3, 2}},
 	{"csv_comma_more" + testFileSuffix, ',', []int{3, 4}},
 	{"csv_comma_more_few" + testFileSuffix, ';', []int{3, 2, 4}},
+	{"csv_comma_quotes" + testFileSuffix, ',', []int{3}},
 }
 
 func TestRead(t *testing.T) {
