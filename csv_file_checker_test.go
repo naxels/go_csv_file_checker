@@ -12,21 +12,22 @@ const (
 )
 
 type testpair struct {
-	fileName           string
-	delimiter          rune
-	expectedSplitCount []int
-	// expectedResult string
+	fileName            string
+	delimiter           rune
+	expectedSplitCount  []int
+	expectedTotalCount  int
+	expectedRecordCount []int
 }
 
 var tests = []testpair{
-	{"csv_comma" + testFileSuffix, ',', []int{3}},
-	{"csv_comma_enclosed" + testFileSuffix, ',', []int{3}},
-	{"csv_comma_enclosed_header" + testFileSuffix, ',', []int{3}},
-	{"csv_pipe" + testFileSuffix, '|', []int{3}},
-	{"csv_comma_few" + testFileSuffix, ',', []int{3, 2}},
-	{"csv_comma_more" + testFileSuffix, ',', []int{3, 4}},
-	{"csv_comma_more_few" + testFileSuffix, ';', []int{3, 2, 4}},
-	{"csv_comma_quotes" + testFileSuffix, ',', []int{3}},
+	{"csv_comma" + testFileSuffix, ',', []int{3}, 1, []int{5}},
+	{"csv_comma_enclosed" + testFileSuffix, ',', []int{3}, 1, []int{5}},
+	{"csv_comma_enclosed_header" + testFileSuffix, ',', []int{3}, 1, []int{6}},
+	{"csv_pipe" + testFileSuffix, '|', []int{3}, 1, []int{5}},
+	{"csv_comma_few" + testFileSuffix, ',', []int{3, 2}, 2, []int{4, 1}},
+	{"csv_comma_more" + testFileSuffix, ',', []int{3, 4}, 2, []int{4, 1}},
+	{"csv_comma_more_few" + testFileSuffix, ';', []int{3, 2, 4}, 3, []int{3, 1, 1}},
+	{"csv_comma_quotes" + testFileSuffix, ',', []int{3}, 1, []int{5}},
 }
 
 func TestRead(t *testing.T) {
@@ -48,16 +49,28 @@ func TestRead(t *testing.T) {
 			t.Fatalf("This file(%q) has no splits", pair.fileName)
 		}
 
-		//test expectedSplitCount match
-		//collect result.Splits Counts
+		//test expectedSplitCount, expectedRecordCount match
+		//collect result.Splits Counts and result.Splits.Records Counts
 		var resultSplitCount []int
+		var recordSplitCount []int
 		for _, s := range result.Splits {
 			resultSplitCount = append(resultSplitCount, s.Count)
+			recordSplitCount = append(recordSplitCount, s.RecordCount)
 		}
 
-		//check if they are equal to what is expected
+		//check if resultSplitCount equal to what is expected
 		if reflect.DeepEqual(resultSplitCount, pair.expectedSplitCount) == false {
 			t.Fatalf("Read(%q) SplitCount = %v, expected %v", pair.fileName, resultSplitCount, pair.expectedSplitCount)
+		}
+
+		//check if recordSplitCount equal to what is expected
+		if reflect.DeepEqual(recordSplitCount, pair.expectedRecordCount) == false {
+			t.Fatalf("Read(%q) RecordCount = %v, expected %v", pair.fileName, recordSplitCount, pair.expectedRecordCount)
+		}
+
+		//test expectedTotalCount match
+		if result.Count != pair.expectedTotalCount {
+			t.Fatalf("Read(%q) Count = %v, expected %v", pair.fileName, result.Count, pair.expectedTotalCount)
 		}
 	}
 }

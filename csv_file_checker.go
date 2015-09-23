@@ -9,12 +9,14 @@ import (
 //Statistics struct for CSV
 type Statistics struct {
 	Filename string
+	Count    int
 	Splits   []Split
 }
 
 //Add Split to Statistics
 func (s *Statistics) Add(split Split) {
 	s.Splits = append(s.Splits, split)
+	s.Count++
 }
 
 //Update Split in Statistics
@@ -52,13 +54,15 @@ func (s *Statistics) ProcessRecord(recordRaw []string) {
 
 //Split struct for splitted records
 type Split struct {
-	Count   int
-	Records []Record
+	Count       int
+	RecordCount int
+	Records     []Record
 }
 
 //Add Line to Splits
 func (s *Split) Add(data Record) {
 	s.Records = append(s.Records, data)
+	s.RecordCount++
 }
 
 //Record struct for each record
