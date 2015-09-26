@@ -26,8 +26,6 @@ func (s *Statistics) Update(location int, split Split) {
 
 //ProcessRecord into Split
 func (s *Statistics) ProcessRecord(recordRaw []string) {
-	var currentSplit = Split{}
-
 	recordSplitCount := len(recordRaw)
 
 	//initialize found and set to -1 to avoid first index (0) problem
@@ -40,9 +38,10 @@ func (s *Statistics) ProcessRecord(recordRaw []string) {
 		}
 	}
 
+	var currentSplit = Split{Count: recordSplitCount}
+
 	// if no Splits or not found Add, else Update
 	if len(s.Splits) == 0 || found == -1 {
-		currentSplit = Split{Count: recordSplitCount}
 		currentSplit.Add(Record{Data: recordRaw})
 		s.Add(currentSplit)
 	} else {
@@ -98,6 +97,8 @@ func Read(fileLocation string, delimiter rune) (*Statistics, error) {
 
 		stats.ProcessRecord(recordRaw)
 	}
+
+	file.Close()
 
 	return &stats, nil
 }
