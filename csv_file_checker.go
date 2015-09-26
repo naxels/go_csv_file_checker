@@ -58,7 +58,7 @@ type Split struct {
 	Records     []Record
 }
 
-//Add Line to Splits
+//Add Record to Splits
 func (s *Split) Add(data Record) {
 	s.Records = append(s.Records, data)
 	s.RecordCount++
@@ -69,7 +69,7 @@ type Record struct {
 	Data []string
 }
 
-//Read function takes in fileLocation and delimiter and returns Statistics struct
+//Read returns a new Statistics after opening file and processing it
 func Read(fileLocation string, delimiter rune) (*Statistics, error) {
 	var stats = Statistics{}
 
