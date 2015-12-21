@@ -8,9 +8,9 @@ import (
 
 //Statistics struct for CSV
 type Statistics struct {
-	Filename string
-	Count    int
-	Splits   []Split
+	Filename string  `json:"filename"`
+	Count    int     `json:"count"`
+	Splits   []Split `json:"splits"`
 }
 
 //Add Split to Statistics
@@ -53,9 +53,9 @@ func (s *Statistics) ProcessRecord(recordRaw []string) {
 
 //Split struct for splitted records
 type Split struct {
-	Count       int
-	RecordCount int
-	Records     []Record
+	Count       int      `json:"count"`
+	RecordCount int      `json:"recordcount"`
+	Records     []Record `json:"records"`
 }
 
 //Add Record to Splits
@@ -66,7 +66,7 @@ func (s *Split) Add(data Record) {
 
 //Record struct for each record
 type Record struct {
-	Data []string
+	Data []string `json:"data"`
 }
 
 //Read returns a new Statistics after opening file and processing it
