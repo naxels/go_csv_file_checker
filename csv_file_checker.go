@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+var (
+	recordInSplitLimit int
+)
+
 //Statistics struct for CSV
 type Statistics struct {
 	Filename string  `json:"filename"`
@@ -60,7 +64,9 @@ type Split struct {
 
 //Add Record to Splits
 func (s *Split) Add(data Record) {
-	s.Records = append(s.Records, data)
+	if len(s.Records) <= recordInSplitLimit {
+		s.Records = append(s.Records, data)
+	}
 	s.RecordCount++
 }
 
@@ -70,8 +76,12 @@ type Record struct {
 }
 
 //Read returns a new Statistics after opening file and processing it
-func Read(fileLocation string, delimiter rune) (*Statistics, error) {
+func Read(fileLocation string, delimiter rune, recordLimit int) (*Statistics, error) {
 	var stats = Statistics{}
+
+	if recordLimit > 0 {
+		recordInSplitLimit = recordLimit
+	}
 
 	file, err := os.Open(fileLocation)
 	if err != nil {

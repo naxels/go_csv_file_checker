@@ -14,25 +14,26 @@ const (
 type testpair struct {
 	fileName            string
 	delimiter           rune
+	recordLimit         int
 	expectedSplitCount  []int
 	expectedTotalCount  int
 	expectedRecordCount []int
 }
 
 var tests = []testpair{
-	{"csv_comma" + testFileSuffix, ',', []int{3}, 1, []int{5}},
-	{"csv_comma_enclosed" + testFileSuffix, ',', []int{3}, 1, []int{5}},
-	{"csv_comma_enclosed_header" + testFileSuffix, ',', []int{3}, 1, []int{6}},
-	{"csv_pipe" + testFileSuffix, '|', []int{3}, 1, []int{5}},
-	{"csv_comma_few" + testFileSuffix, ',', []int{3, 2}, 2, []int{4, 1}},
-	{"csv_comma_more" + testFileSuffix, ',', []int{3, 4}, 2, []int{4, 1}},
-	{"csv_comma_more_few" + testFileSuffix, ';', []int{3, 2, 4}, 3, []int{3, 1, 1}},
-	{"csv_comma_quotes" + testFileSuffix, ',', []int{3}, 1, []int{5}},
+	{"csv_comma" + testFileSuffix, ',', 0, []int{3}, 1, []int{5}},
+	{"csv_comma_enclosed" + testFileSuffix, ',', 0, []int{3}, 1, []int{5}},
+	{"csv_comma_enclosed_header" + testFileSuffix, ',', 0, []int{3}, 1, []int{6}},
+	{"csv_pipe" + testFileSuffix, '|', 0, []int{3}, 1, []int{5}},
+	{"csv_comma_few" + testFileSuffix, ',', 0, []int{3, 2}, 2, []int{4, 1}},
+	{"csv_comma_more" + testFileSuffix, ',', 0, []int{3, 4}, 2, []int{4, 1}},
+	{"csv_comma_more_few" + testFileSuffix, ';', 0, []int{3, 2, 4}, 3, []int{3, 1, 1}},
+	{"csv_comma_quotes" + testFileSuffix, ',', 0, []int{3}, 1, []int{5}},
 }
 
 func TestRead(t *testing.T) {
 	for _, pair := range tests {
-		result, err := Read(testDataDir+string(os.PathSeparator)+pair.fileName, pair.delimiter)
+		result, err := Read(testDataDir+string(os.PathSeparator)+pair.fileName, pair.delimiter, pair.recordLimit)
 		if err != nil {
 			t.Fatalf("Read(%q) err = %v, expected nil", pair.fileName, err)
 		}
