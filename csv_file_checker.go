@@ -1,9 +1,10 @@
 package csvfilechecker
 
 import (
-	"encoding/csv"
+	"bufio"
 	"io"
 	"os"
+	"strings"
 )
 
 var (
@@ -76,7 +77,7 @@ type Record struct {
 }
 
 //Read returns a new Statistics after opening file and processing it
-func Read(fileLocation string, delimiter rune, recordLimit int) (*Statistics, error) {
+func Read(fileLocation string, delimiter string, recordLimit int) (*Statistics, error) {
 	var stats = Statistics{}
 
 	if recordLimit > 0 {
@@ -91,13 +92,10 @@ func Read(fileLocation string, delimiter rune, recordLimit int) (*Statistics, er
 	fileInfo, _ := file.Stat()
 	stats.Filename = fileInfo.Name()
 
-	r := csv.NewReader(file)
-	r.Comma = delimiter
-	r.FieldsPerRecord = -1 // one of the key statistics is discovering broken CSV files
-	r.LazyQuotes = true    // the unpredicability of incoming data should allow "'s to appear
+	r := bufio.NewReader(file)
 
 	for {
-		recordRaw, err := r.Read()
+		recordRaw, err := r.ReadString('\n')
 		if err == io.EOF {
 			break
 		}
@@ -105,7 +103,7 @@ func Read(fileLocation string, delimiter rune, recordLimit int) (*Statistics, er
 			return &stats, err
 		}
 
-		stats.ProcessRecord(recordRaw)
+		stats.ProcessRecord(strings.Split(recordRaw, delimiter))
 	}
 
 	file.Close()
