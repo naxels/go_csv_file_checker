@@ -12,23 +12,25 @@ const (
 )
 
 type testpair struct {
-	fileName            string
-	delimiter           string
-	recordLimit         int
-	expectedSplitCount  []int
-	expectedTotalCount  int
-	expectedRecordCount []int
+	fileName                string
+	delimiter               string
+	recordLimit             int
+	expectedSplitCount      []int
+	expectedTotalCount      int
+	expectedRecordCount     []int
+	expectedRecordDataCount []int
 }
 
 var tests = []testpair{
-	{"csv_comma" + testFileSuffix, ",", 0, []int{3}, 1, []int{5}},
-	{"csv_comma_enclosed" + testFileSuffix, ",", 0, []int{3}, 1, []int{5}},
-	{"csv_comma_enclosed_header" + testFileSuffix, ",", 0, []int{3}, 1, []int{6}},
-	{"csv_pipe" + testFileSuffix, "|", 0, []int{3}, 1, []int{5}},
-	{"csv_comma_few" + testFileSuffix, ",", 0, []int{3, 2}, 2, []int{4, 1}},
-	{"csv_comma_more" + testFileSuffix, ",", 0, []int{3, 4}, 2, []int{4, 1}},
-	{"csv_comma_more_few" + testFileSuffix, ";", 0, []int{3, 2, 4}, 3, []int{3, 1, 1}},
-	{"csv_comma_quotes" + testFileSuffix, ",", 0, []int{3}, 1, []int{5}},
+	{"csv_comma_enclosed" + testFileSuffix, ",", 1, []int{3}, 1, []int{5}, []int{1}}, // recordlimit per Split test
+	{"csv_comma" + testFileSuffix, ",", 0, []int{3}, 1, []int{5}, []int{5}},
+	{"csv_comma_enclosed" + testFileSuffix, ",", 0, []int{3}, 1, []int{5}, []int{5}},
+	{"csv_comma_enclosed_header" + testFileSuffix, ",", 0, []int{3}, 1, []int{6}, []int{6}},
+	{"csv_pipe" + testFileSuffix, "|", 0, []int{3}, 1, []int{5}, []int{5}},
+	{"csv_comma_few" + testFileSuffix, ",", 0, []int{3, 2}, 2, []int{4, 1}, []int{4, 1}},
+	{"csv_comma_more" + testFileSuffix, ",", 0, []int{3, 4}, 2, []int{4, 1}, []int{4, 1}},
+	{"csv_comma_more_few" + testFileSuffix, ";", 0, []int{3, 2, 4}, 3, []int{3, 1, 1}, []int{3, 1, 1}},
+	{"csv_comma_quotes" + testFileSuffix, ",", 0, []int{3}, 1, []int{5}, []int{5}},
 }
 
 func TestRead(t *testing.T) {
@@ -54,9 +56,12 @@ func TestRead(t *testing.T) {
 		//collect result.Splits Counts and result.Splits.Records Counts
 		var resultSplitCount []int
 		var recordSplitCount []int
+		var recordSplitRecordDataCount []int
 		for _, s := range result.Splits {
+			t.Logf("stats: SplitCount: %v, RecordCount: %v, RecordDataCount: %v", s.Count, s.RecordCount, len(s.Records))
 			resultSplitCount = append(resultSplitCount, s.Count)
 			recordSplitCount = append(recordSplitCount, s.RecordCount)
+			recordSplitRecordDataCount = append(recordSplitRecordDataCount, len(s.Records))
 		}
 
 		//check if resultSplitCount equal to what is expected
@@ -72,6 +77,11 @@ func TestRead(t *testing.T) {
 		//test expectedTotalCount match
 		if result.Count != pair.expectedTotalCount {
 			t.Fatalf("Read(%q) Count = %v, expected %v", pair.fileName, result.Count, pair.expectedTotalCount)
+		}
+
+		//test expectedRecordDataCount match
+		if reflect.DeepEqual(recordSplitRecordDataCount, pair.expectedRecordDataCount) == false {
+			t.Fatalf("Read(%q) RecordDataCount = %v, expected %v", pair.fileName, recordSplitRecordDataCount, pair.expectedRecordDataCount)
 		}
 	}
 }

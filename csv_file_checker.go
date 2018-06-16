@@ -65,9 +65,11 @@ type Split struct {
 
 //Add Record to Splits
 func (s *Split) Add(data Record) {
-	if len(s.Records) <= recordInSplitLimit {
+	// append record if it is below the InSplitLimit or the recordInSplitLimit is not set (-1)
+	if len(s.Records) <= recordInSplitLimit || recordInSplitLimit == -1 {
 		s.Records = append(s.Records, data)
 	}
+
 	s.RecordCount++
 }
 
@@ -80,8 +82,10 @@ type Record struct {
 func Read(fileLocation string, delimiter string, recordLimit int) (*Statistics, error) {
 	var stats = Statistics{}
 
-	if recordLimit > 0 {
-		recordInSplitLimit = recordLimit
+	if recordLimit == 0 {
+		recordInSplitLimit = -1
+	} else {
+		recordInSplitLimit = recordLimit - 1 // compensate for 0 index
 	}
 
 	file, err := os.Open(fileLocation)
